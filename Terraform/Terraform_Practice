@@ -1,0 +1,1191 @@
+#This is just the notes to practice step by step.
+#You should have atleast basic knowledge on Terraform to start
+#The notes contain all the practice steps 
+#If you have any doubts on the notes, use the content and ask chatGPT
+#Contributers are welcome
+
+Intraduction to Terraform
+Providers
+Resources & Data sources
+Terraform State
+Output
+Variables
+Env Vars
+Modules
+
+Two Projects
+one with ec2 and other with EKS
+
+Demoproject with CI - CD
+
+=======
+
+Introduction
+
+Terrraform allows to automate and manage infrastructure.
+
+Open source and and Declarative
+
+Declarative = Declares what you want and define it
+
+
+Provisioning Infrastruction then deploying application.
+
+Terraform  does provisioning infrastructure
+eg: VPC, ec2 etc...
+
+This needs to be done in correct order.
+
+Replicating infrastructure is done easily with Terraform
+
+======
+
+Terraorm architecture
+
+Two main components of Terraform...
+
+1) core: it usees two input configuration
+TF-config, state...
+
+Core plans from two inputs and works according to updated plan
+
+It makes sures Current state = Desired State
+
+Second part is providers
+
+eg : AWS | Azure
+
+Terraform has over 100+ providers for this technology...
+
+Each provider has 100's of uses
+
+=========
+
+Example of Terraform config file
+
+#Configure the AWS Provider
+
+provider "aws" {
+    version = "~> 2.0"
+    region = "us-east-1"
+}
+
+#Create a VPC
+
+resource "aws_vpc" "example" {
+cid_block = "10.0.0.0/16"
+}
+
+==========
+
+
+Declarative Approach
+
+You define the end state in config file...
+
+Eg: I need 5 servers with following approch... We need to provided aws user with following permission.
+
+Benefits of Declarative
+
+New desired state will be current desired state instead of changing one by one.
+
+We just need to adjust he old file and re execute it. always knows the current state.
+
+=======
+
+Terraform Basic commands for different states
+
+refesh : infrastructure provider to get current state
+
+plan : create and execution plan
+
+apply :  execute the plan
+
+destroy : destroy the infra
+
+=====
+
+Key takeaways
+
+tool for creating infrastructure
+
+Universal LAC tool
+
+can be integrated with difference cloud providers
+
+Use just one tool with API for integration
+
+====
+
+Connecting to AWS platform
+
+Expose resources for specific infrastructure
+Responsible for understanding API 
+Just code that kows how to talk to specific technogy or platform
+
+Go to terraform website main page.
+
+List of providers can be seen in providers page.
+
+The offical website is maintined and created by Hashicorp
+
+We can also see some third party providers and community providers. 
+
+eg: look for jenkins providers
+
+====
+In provider 
+
+we can see documentation on how to use the provider
+
+Install and connect to providers
+
+Aws configure list credentials need to be given in terraform. Its better to give as varibales.
+
+
+Terraform is well documented and search optimized
+
+In the main.tf file
+
+provider "aws" {
+     region = "eu-west-3"
+     access_key = "pastekey"
+     secret_key = "pasteysecretkey"
+}
+
+Providers are not included in the terraform download. We need to add again after downloading. Its moduler.
+
+Go to Terraform website and AWS provider in it.
+
+Go to terraform folder.
+
+terraform init = initiates terraform
+
+It initializs aws provider because we have used privider aws in main.tf file
+
+Now you can file two hidden files.
+
+.terraform
+.terraform.lock.hcl
+
+Provider gives us complete API availability. We can use all aws resources using terraform provider.
+
+List of resources can be seen in Terraform aws provider documentation in official website
+
+=====
+
+Resources and Datasources
+
+In the main.tf file
+
+provider "aws" {
+     region = "eu-west-3"
+     access_key = "pastekey"
+     secret_key = "pasteysecretkey"
+}
+
+resource "aws_vpc" "wedecidethename" {
+     cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_subnet" "customname" {
+#we are creating subnet in vpc, here vpc isn't created.
+#In this case to refer by .and name of our vpc. eg:
+     vpc_id = aws_vpc.wedecidethename.id
+     cidr_block = "10.0.0.0/24"
+     availability_zone = "eu-west-3a"
+}
+
+Lets apply and check
+
+=====
+
+When we apply it shows the list of changes that occurs
+
+Check the list and confirm by typing yes
+
+=============
+
+Using Data resources
+
+eg: Creating subnet in exiting vpc
+
+data = it lets you query data from existing container
+
+We can also see data documentation in provider.
+
+below resource in main.tf file. continue
+
+data "aws_vpc" "exitingvpcname" {
+      default = true
+}
+
+resource "aws_subnet" "subnetname" {
+   vpc_id = data.aws_vpc.existingvpc.id
+   cidr_block = "provide subset block of vpc"
+   availability_zone = "eu-west-3b"
+}
+
+Lets appy it by using Terraform apply check for the changes to occur and confirm the changes. Now we can see the resources inside the vpc we used. 
+
+Recap
+
+Terraform syntax is straight forward
+Provider is like importing a library 
+data is like importing a exiting function.
+resource is like a function.
+
+Also if you re apply the terraform you just applied then nothing will change as the desired state is already the current state - Declarative language
+
+idempodent: Apply n number of times and you will still get the same result. 
+
+====
+
+Changing and Destroying resources
+
+Adding tags to the resources. We can provide tags for any resource
+
+In main.tf file lets make some changes.
+
+provider "aws" {
+     region = "eu-west-3"
+     access_key = "pastekey"
+     secret_key = "pasteysecretkey"
+}
+
+resource "aws_vpc" "wedecidethename" {
+     cidr_block = "10.0.0.0/16"
+     tags = {
+        Name: "Development",
+        vpc_env: "dev"
+    }
+}
+
+resource "aws_subnet" "customname" {
+     vpc_id = aws_vpc.wedecidethename.id
+     cidr_block = "10.0.0.0/24"
+     availability_zone = "eu-west-3a"
+     tags = {
+        Name: "Subnet-Development"
+    }
+
+}
+
+data "aws_vpc" "exitingvpcname" {
+      default = true
+}
+
+resource "aws_subnet" "subnetname" {
+   vpc_id = data.aws_vpc.existingvpc.id
+   cidr_block = "provide subset block of vpc"
+   availability_zone = "eu-west-3b"
+}
+
+Apply changes and see
+
+===
+
+It shows ~ this character. It indicates changing the exiting feature.
+
+it shows what changes will be made
+
+~ = known as tild
+
+Click yes and see the changes made
+
+We can also remove from exiting resource. Change a tag name and apply again to see.
+
+Removing and destroying the resources.
+
+Two ways to do it.
+
+Once option is to remove the terrform file resources and re apply the file. It deletes the remaining resources which are n't available in the file.
+
+Second option is
+
+Using Terraform destroy command
+
+terraform destroy -target aws_subnet.resourcename = this will destroy the specific resource
+
+Its better to use terraform apply instead of terraform destroy. This way we know what is the exact state of infrastruction. Its better the changes need to be made with the main.tf file
+
+===
+
+More Terraform Commands
+
+Terraform plan = Checking Different between current state and desired state
+
+terraform apply -auto-approve = no confirmation
+
+terraform destroy = destories all the the resources provided in the file. We can see preview
+
+====
+
+State
+
+Terraform keeps track of current state and read the desired state
+
+How does the terraform know current state = the two additional files in terraform are
+
+terraform.tfstate
+terraform.tfstate.backup
+
+JSON file, where terraform stores the state about your real world resources of your managed infrastructure
+
+When we apply terraform form.
+
+It goes to provider aws and connects to account and executes the resources then stores in terraform.tfstate file.
+
+terraform.tfstate.backup shows the previous state of the file.
+
+Apply some resources and check the tfstate file to see the resources.
+
+terraform state =  shows the subcommands of terraform state
+
+eg: list, mv, pull, push, replace-provider, rm, show
+
+terraform state show resourcename
+
+====
+
+Output
+
+It allows to output the set of attributes..We write some and other are generated by terraform
+
+we can see them by terraform show.
+
+output values are like functioon return values
+
+destroy some resources and recreate them to see
+
+Inside main.tf file we can write output value
+
+eg:
+
+output "vpc-id(ourwishname)" {
+     value = aws_vpc.nameofvpc.id
+
+}
+
+output "subnetid(ourwishname)" {
+     value = aws_subnet.nameofsubnet.id
+
+}
+
+#Each attribute needs to be defined by one output, cant use multiple values in one output
+
+===
+
+Variables
+
+Introduction to vars
+
+variables = input variables
+
+we can use variables reference in main.tf file
+
+This is helpful when we use values multiple times.
+
+Lets use a varibales in cidr sub-block
+
+In main.tf file below provider section
+
+variable "subnet_cidr_block" {
+   description = "subnet cidr block"
+}
+
+resource "aws_subnet" "subnetname" {
+   vpc_id = data.aws_vpc.existingvpc.id
+   cidr_block = "var.subnet_cidr_block"
+   availability_zone = "eu-west-3b"
+}
+
+There are three ways to pass value to input variable
+
+one way :
+
+Terraform apply = now it asks for value as we did not mention in the script
+
+apply and check
+
+second way
+
+terraform apply -var "subnet_cidr_block=10.0.20.0/24"
+
+Third way
+
+Third way.. Best practice
+
+Defining a variable file and assigning values there
+
+filename should be... terraform.tfvars
+
+Terraform automatically recognized this file
+
+Inside the terraform.tfvars file add value to variable
+
+
+subnet_cidr_block = "10.0.40.0/24"
+
+apply and check
+
+===
+
+Lets create another varible
+
+variable "subnet_cidr_block" {
+   description = "vpc cidr block"
+}
+
+assign value in terraform.tfvars file
+
+subnet_cidr_block = "10.0.0.0/16"
+
+===
+
+Use cases for input varibales
+
+Replicate same infrastructure for different environments
+
+variable "environment" {
+ description = deployment environment
+}
+
+Assign in terraform.tfvars
+
+environment = "development"
+
+In this case. we would have each variable file for each environment such as dev, staging and production
+
+Creating another file with name terraform-dev.tfvars
+
+now when you run terraform apply. Terraform cannot find the variables file if terraform.tfvars not avaible. In this case. we need to a command with parameter
+
+terraform apply -var-file terraform-dev.tfvars = this command understands the varibale file
+
+===
+
+Default values
+
+we can assign variables default values
+
+inside
+
+variable "subnet_cidr_block" {
+   description = "subnet cidr block"
+   default = "10.0.10.0/24"
+}
+
+Default value kicks in when it cannot find variable in variables file.
+
+===
+
+Type constraints
+
+second thing is set a variable type.
+
+example
+
+variable "subnet_cidr_block" {
+   description = "subnet cidr block"
+   default = "10.0.10.0/24"
+   type = string
+}
+
+lets try with type = list of strings
+
+variable "cidr_blocks" {
+   description = "subnet blocks for vpc and subnets"
+   type = list(string)
+}
+
+In terraform-dev.tfvars file add
+
+cidr_blocks = ["10.0.0.0/16", "10.0.50.0/24"]
+
+To call only second element of list.
+
+resource "aws_subnet" "subnetname" {
+   vpc_id = data.aws_vpc.existingvpc.id
+   cidr_block = "var.cidr_block[2] "
+   availability_zone = "eu-west-3b"
+}
+
+Terraform apply and check
+
+We can also use objects inside list varibales
+
+example
+
+Inside terraform-dev.tfvars file
+
+cidr_blocks = [
+	{cidr_block = "10.0.0.0/16", name = "dev-vpc"}
+	{cidr_block = "10.0.0.0/24", name = "dev-subnet"}
+]
+
+we can also change
+
+variable "cidr_blocks" {
+   description = "subnet blocks for vpc and subnets"
+   type = list(object({
+         cidr_block =string
+         name = string
+}))
+}
+
+====
+
+Environment variables
+
+Setting credentials as environmental variables
+
+Go to terminal
+
+export AWS_SECRET_ACCESS_KEY= paste keys
+export AWS_ACCESS_KEY_ID=paste keys
+
+now terraform apply and check. It should work but if we swtich to another terminal then it will not be possible
+
+Globally configure AWS credentials
+
+~/.aws/credentials this is default location for storing aws credentials. For this we need aws cli installed in our pc
+
+try aws configure
+
+provide credentials. and apply
+
+Now remove credentials from main.tf and apply and check
+
+Custom terraform variables
+
+eg:
+export TF_VAR_avail_zone=eu-west-3a
+
+now we refer to variable as avail_zone
+
+TF_VAR says its a global variable and avail_zone used as the name of the variable
+
+in resource """"{
+we can use var.avail_zone
+}
+
+Apply and check for the changes
+
+====
+
+ Demo project with ec2
+
+Create custom VPC
+Create custom subnet
+Create route table and internet gateway
+Provision ec2 instance
+deploy nginx docker container inside ec2
+create security group
+
+provider "aws"{}
+
+variable vpc_cidr_block{}
+variable subnet_cidr_block{}
+variable avail_zone {}
+variable env_prefix {}
+
+resource "aws_vpc" "myapp-vpc" {
+    cidr_block = var.vpc_cidr_block
+    tags = {
+       name: "${var.env_prefix}-vpc"
+	}
+}
+
+resource "aws_subnet" "myapp-vpc" {
+    vpc_id = aws_vpc.myapp-vpc.id
+    cidr_block = var.subnet_cidr_block
+    tags = {
+       name:  "${var.env_prefix}-subnet-1"
+
+	}
+}
+
+Lets assign value to variables
+
+in terraform.tfvars file
+
+vpc_cidr_block = "10.0.0.0/16"
+subnet_cidr_block = "10.0.0.0/24"
+avail_zone = "eu-west-3b"
+env_prefix = "dev"
+
+
+Terraform plan
+
+terraform plan --auto-approve
+
+====
+
+Initialize Git repository
+
+Create git repo for terraform directory
+
+Add .gitignore file and ignore
+
+.terraform/*
+
+terraform.tfstate
+terraform.tfstate.backup
+#varibales file
+terraform.tfvars
+
+commit and push remaining files
+
+====
+
+Lets write Route table and Internet gateway
+
+Usually default route table will be created when we create VPC
+
+NACL will also be created along with VPC
+
+====
+
+To connect VPC to Internet we need to configure the following
+
+We will be creating a new route table
+
+
+resource "aws_internet_gateway" "myapp-igw" {
+      vpc_id = aws_vpc.myapp-vpc.id
+      tags = {
+             Name: "${var.env_prefix}-igw"
+         }
+
+}
+
+
+resource "aws_route_table" "myapp-route-table" {
+   vpc_id = aws_vpc.myappp-vpc.id
+   route {
+       cidr_block = "0.0.0.0/0"
+       gateway_id =  aws_internet_gateway.myapp-igw.id
+	}
+       tags = {
+            Name: "${var.env_prefix}-rtb"
+         }
+}
+
+Terraform plan and apply
+
+Subnet Association with Route Table
+
+We need to associate subnet with route table. Usually subnets are associated with main route table.
+
+resource "aws_route_table_association" "a-rtb-subnet" {
+ subnet_id = aws_subnet.myapp-subnet-1.id
+ route_table_id = aws_route_table.myapp-route-table.id
+}
+
+Apply and check the associations
+
+What if we use Main Route Table. we can as below
+get default route table ID by terraform state show aws_vpc.myapp-vpc take default rtb if from here.
+
+resource "aws_default_route_table" "default-rtb" {
+	default_route_table_id = aws_vpc.myapp-vpc.default_route_table_id.id
+	cidr_block = "0.0.0.0/0"
+       gateway_id =  aws_internet_gateway.myapp-igw.id
+
+	tags = {
+            Name: "${var.env_prefix}-main-rtb"
+         }
+}
+
+terraform plan
+
+====
+
+Security Group
+
+We need to open port 22, as we need to access nginx we browser we need to open 8080 port
+
+resource "aws_security_group" "myapp-sg" {
+	name = "myapp-sg"
+	vpc_id = aws_vpc.myapp-vpc.id
+#Firewall rules, incoming traffic ingress
+	ingress {
+	    from_port = 22
+ 	    to_port = 22
+	    protocol = "tcp"
+	    cidr_blocks = ["0.0.0.0/0"]
+	}
+
+	ingress {
+	    from_port = 8080
+ 	    to_port = 8080
+	    protocol = "tcp"
+	    cidr_blocks = ["0.0.0.0/0"]
+	}
+
+	egress {
+	    from_port = 0
+ 	    to_port = 0
+	    protocol = "-1"
+	    cidr_blocks = ["0.0.0.0/0"]
+	    prefix_list_ids = []
+	}
+
+	tags = {
+	    Name: "${var.env_prefix}-sg"
+	}
+}
+
+Terraform plan and apply
+
+If we want to default security group. we can work with the below syntax
+
+resource "aws_default_security_group" "myapp-default-sg" {
+	name = "myapp-default-sg"
+	vpc_id = aws_vpc.myapp-vpc.id
+#Firewall rules, incoming traffic ingress
+	ingress {
+	    from_port = 22
+ 	    to_port = 22
+	    protocol = "tcp"
+	    cidr_blocks = ["0.0.0.0/0"]
+	}
+
+	ingress {
+	    from_port = 8080
+ 	    to_port = 8080
+	    protocol = "tcp"
+	    cidr_blocks = ["0.0.0.0/0"]
+	}
+
+	egress {
+	    from_port = 0
+ 	    to_port = 0
+	    protocol = "-1"
+	    cidr_blocks = ["0.0.0.0/0"]
+	    prefix_list_ids = []
+	}
+
+	tags = {
+	    Name: "${var.env_prefix}-sg"
+	}
+}
+
+===
+
+Amazon Manchine Image
+
+Lets configure AWS Ec2 instance, SET ami dynamically
+We need to use data type for it.
+Owners in ami can be viewed in aws console. Go to ami and public images. you can fine owner there, search can be done using ami id
+
+
+data "aws_ami" "latest-amazon-linux-image" {
+	most_recent = true
+	owners = ["amazon"]
+	filer {
+	    name = "name"
+	    value = ["amzn2-ami-hvm-*-gp2"]
+	}
+}
+
+output "aws_ami" {
+	value = data.aws_ami.atest-amazon-linux-image.id
+}
+
+Terraform plan and apply to check
+
+resource "aws_instance" ""myapp-server" {
+	ami = data.aws_ami.atest-amazon-linux-image.id
+
+}
+
+===
+
+
+Terraform plan and apply to check
+
+Define variables when we use var. in resources
+
+resource "aws_instance" ""myapp-server" {
+	ami = data.aws_ami.atest-amazon-linux-image.id
+	instance_type = var.instance_type
+	subnet_id = aws_subnet.myapp-subnet-.id
+	vpc_security_group_ids = [aws_default_security_group.default-sg.id]
+
+	availability_zone = var.avail_zone
+	associate_public_ip_address = true
+
+#create a keypair in aws.console, keep the pem file in /.ssh folder
+#chmod 400 ~/.ssh/keyfile, key file must have limited permissions
+
+	key_name = "keyfilename"
+
+	tags = {
+	  Name = "${var.env_prefix}-server}"
+	}
+}
+
+Terraform plan and apply
+
+===
+
+
+Now we can ssh into our machine using ssh
+
+ssh -i ~/.ssh/keyfilename @ec2-user@publicip
+
+Automate ssh keypair
+
+lets create a resource above aws_instance resource. TO create public key a keypair should exit locally in our machine. ssh-keygen, location = .ssh/id_rsa.pub
+
+resource "aws_key_pair" "ssh-key" {
+	key_name = "server_key"
+	public_key = "${file("/.ssh/id_rsa.pub")}"
+}
+
+now we can use this key in aws instance resource.
+
+key_name = aws_key_pair.ssh-key.key_name
+
+Terraform plan and apply
+
+lets write another output that will printout public ip of instance
+
+output "ec2_public_ip" {
+	value = aws_instance.myapp-server.public_ip
+}
+
+terraform plan and apply
+
+Now we can actually ssh directly into the new instance becaues we used this instance public key
+
+ssh -i ~/.ssh/id_rsa ec2-user@publicip
+
+Terraform destroy after the practice is done
+
+===
+
+Run entrypoint script to start docker container
+
+We can execute some commands inside terraform to execute
+
+Inside resource aws instance
+
+resource "aws_instance" "myapp-server'{
+	xxxx
+
+	user_data = <<EOF
+				#!/bin/bash
+				sudo yum update - && sudo yum install -y docker
+				sudo systemctl start docker
+				sudo usermod -aG docker ec2-user
+				docker run -p 8080:80 nginx
+			EOF
+
+	tagsxxx
+}
+
+terraform plan and apply
+
+Terraform demo project with EC2 instance is done
+
+===
+
+Extract to shell script
+
+user_data = file("entry-script.sh")
+
+This will refer to file and run the script mentioned in the script
+
+Terraform plan and apply
+
+
+Commit to the own feature branch in github
+
+git checkout -b feature/deploy-to-ec2-default-components
+
+git add .
+git commit -m "added ec2 deployment"
+
+git push -u origin
+
+This is configuring infrastructure and not servers
+
+===
+
+Provisioners
+
+Excecuting commands on virtual server. We can user user_data attribute
+
+Initial data when lauching the instance.
+Suppoted by majority cloud providers.
+
+This data is run by cloud provider as submitted by terraform.
+
+Terraform doesn't have control over this process
+
+Other ways to execture commands on servers using terraform providers
+
+Create a new branch git branch provisioners
+
+resource "aws_instance" "myserver" {
+	xxx
+#we need to define connect attribute to connect remote server
+
+	connection {
+		type = "ssh"
+		host  = self.public_ip
+		user = "ec2-user"
+		private_key = file(var.private_key_loc)
+
+	}
+
+	#user_data = file ("entrry-script.sh")
+#provisioner allows us to connect to server and run commands inside it
+
+	provisioner "remote-exec" {
+		inline = [
+			"export ENV=dev",
+			"mkdir newdir"
+		]
+	}
+}
+
+Terraform plan and apply
+
+
+====
+
+If we want to send file to multiple servers, we can use connection inside provisioner file
+resource "aws_instance" "myserver" {
+	xxx
+#we need to define connect attribute to connect remote server
+
+	connection {
+		type = "ssh"
+		host  = self.public_ip
+		user = "ec2-user"
+		private_key = file(var.private_key_loc)
+
+	}
+#file provision made for copying files from local machine to remote machine
+
+	provisioner "file" {
+		source = "path of file"
+		destionation = "path to copy location "
+
+		connection {
+		type = "ssh"
+		host  = self.public_ip
+		user = "ec2-user"
+		private_key = file(var.private_key_loc)
+
+	}
+
+}
+
+	#user_data = file ("entrry-script.sh")
+#provisioner allows us to connect to server and run commands inside it
+
+	provisioner "remote-exec" {
+		inline = [
+			"export ENV=dev",
+			"mkdir newdir"
+		]
+	}
+}
+
+Terraform plan and apply
+
+====
+
+#Local exec execute commands locally. invokes a lcal executable after resource is created.
+#locally, not on the created resource
+
+provisioner "local-exec" {
+	command = "echo ${self.public_ip} > output.txt"
+}
+
+Provisioners are not recommended by terraform
+
+Reasons
+
+Provision concept breaks idempotency concept
+
+TF doesn't know what to execute in shell script
+
+breaks current state = desired state comparison
+
+TF cann't control script
+
+Alternatives are configuration management tools such as ansible
+
+Alternative to remote-exec is ansible
+
+provisioner local-exec alternative is execute separate scripts
+
+Provisioner failure
+
+If provisioner fails, terraform marks resource as failed and we need to recreate it.
+
+
+====
+
+Modules
+
+Introduction
+
+Without Modules, Complex configurations, huge file and no overview
+
+Concept of modules makes organize and group configurations
+
+We break our concept in logication groups
+
+We need to group resource package in one module and we can re use it
+
+customize configuration with varibles
+
+output values
+
+expose created resources or specific attributes
+
+Modules make configuration much cleaner
+
+Whenever we are creating module it should be proper abstaction
+
+Create own modules
+
+Also there are existing modules we can use
+
+Go to terraform registry and find modules beside providers
+
+We can see list of modules we can use
+
+===
+
+Modularize our project
+
+Create a branch for modules
+
+git checkout -b feature/modules
+
+Project Struture
+
+main.tf
+
+variables.tf
+
+outputs.tf
+
+providers.tf
+
+
+Copy resources to separte files
+
+We don't have to link files, terraform can actually understand links
+
+Create a module
+
+mkdir modules
+
+cd modules
+
+mkdir webserver
+
+mkdir subnet
+
+cd webserver
+
+touch main.tf
+
+touch outputs.tf
+
+touch varibles.tf
+
+cd ../subnet
+
+touch main.tf
+
+touch outputs.tf
+
+touch varibles.tf
+
+Now module structure is created
+
+===
+
+Project structure
+
+- Root module
+
+-/modules = child modules
+
+"child module" - a module that is called by another configuration
+
+Start extracting the configuration
+
+Module should group a couple of resources together
+
+group multiple resources into a logical unit
+
+Move vpc resources to subnet module in main.tf
+
+update subnet vaibles.tf file
+
+
+Use the modules
+
+Referring from main.tf of main folder
+
+module "myapp-subnet" {
+	source = "./ modules/subnet"
+#values need to provided for varibles
+	subnet_cidr_block = var.subnet_cidr_block
+}
+
+vairbles can be called on from varibles.tf file one from subnet module
+
+Module output
+
+How do we access the resource of the child module
+
+output values
+
+to expose resource attribute too parent  module
+
+To do it. We need to use output atribute in outputs.tf
+
+output "subnet" {
+ 	value = aws_subnet.myapp-subnet-1
+}
+
+syntax to call is
+subnet_id = module.myapp-subnet.subnet.id
+
+We need to terraform init again. Once we change the module terraform init is mandatory to initiallize modules
+
+Terraform apply and see
+
+===
+
+Modules Part 3
+
+Create webserver module
+
+Extracting webserver configuration from main.tf in terraform folder and changing to main.tf in ./modules/webserver
+
+security group, keypair, aws instance can be copied together to main.tf
+
+Check all the varibles and update
+
+terraform init
+
+then terraform plan and apply
+
+Whenever we get error in terraform crash.log file gets generated
+
+====
+
+
