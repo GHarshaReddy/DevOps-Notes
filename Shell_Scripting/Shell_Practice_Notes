@@ -1,0 +1,1146 @@
+#This Practice Notes is made from Teaching Knowledge Youtube Channel
+#The link to the channel's playlist will be provided in the file
+#If you already have some knowledge on Bash then you can start practicing
+#If you are a complete begginer and want to learn
+#Watch the playlist provided in the text then start practicing
+#This file provides best guidance to pracice step by step
+#Contributions are welcome
+
+Shell | Bash | Shell Scripting | Programming knowledge Youtube channel
+
+https://www.youtube.com/watch?v=cQepf9fY6cE&list=PLS1QulWo1RIYmaxcEqw5JhK3b-6rgdWO_&ab_channel=ProgrammingKnowledge
+
+Unix shell program interprets user commands.
+
+Shell scripts are interpreted and not compiled.
+
+In this we willl be learnings Bash shells
+
+cat /etc/shells = this shows what shells are supported by our computer
+
+sh = stands for borne shell
+bash = stands for borne again shell
+
+where bash is location = which bash
+usually its /bin/bash
+
+Lets create Hello world bash script
+
+touch hello.sh
+
+.sh = not necessary to execute shell script. but its useful to use .sh because editors understand the file is shell
+
+ls -al = it shows the files and permissions of the files.
+
+code . = opens visual studio code
+
+vim hello.sh
+
+#! = known as shebang
+
+#!/bin/bash = This helps the interpreter to know that its a bash script
+
+echo "Hello Word"
+
+chmod 700 hello.sh
+
+Save and Close. Then execute the script ./hello.sh
+
+====
+
+vim hello.sh
+
+#!/bin/bash
+
+Comments are helpful to read about the code we written. It is started with a #
+
+# this is a comment
+
+#it can also be used after script like
+
+echo "Hello World" #comment can be written here too
+
+Now lets start with variables
+
+varibales are the containers which stores data inside them. It can be string or number or anyother
+
+in shell there are two types of variables
+
+one is system variables
+second is user defined variables
+
+System variables are capital defined usually.
+
+user varibales are created by us, it can be lower case or upper case.
+
+echo $BASH = this should give us bash shell name.
+
+execute the script and check
+
+echo $BASH_VERSION = this should give bash version
+
+echo $HOME = it should give home directoring
+
+echo $PWD = shows present working directory
+
+execute the script and check
+
+User defined variables
+
+We can create by simply giving a name
+
+name=Mark
+#we can use this variables with a dollar symbol
+
+echo $name
+
+Lets define other variables
+
+10val=10
+
+echo value $10val
+
+This shows wrong out because variable name should not start with a number.
+
+ ====
+
+ vim hello.sh
+
+#!/bin/bash
+
+Reading inputs from terminal in our script
+
+to get input from keyboard we use read command
+
+lets see
+
+echo "Enter name : "
+
+read name
+
+echo "Entered name : $name"
+
+run the script and check
+
+to read multiple inputs enter multiple variables with space eg. read name1 name2 ...
+
+echo "Entered name : $name1 , name2,"
+
+If we want to enter input on same line we printed on echo string.
+-p allows us to enter input on same line
+
+read -p 'username : ' user_var
+
+echo "username : $user_var"
+
+run the script and check
+
+allow user to enter and do not show what he is typing, we should use -s flag ..eg
+
+read -sp 'username : ' user_var
+echo "username : $user_var"
+
+run script and check
+
+Allow users to enter multiple parameters and save inside an array,
+- a= tells script to read an array
+
+echo "Enter names : "
+read -a names
+echo "Names : ${names[0], $names[1]}"
+
+===
+
+Pass Arguements to Bash Scripts
+
+Whenever we pass arguement they are stored into default $1 then second will be stored in $2
+
+#! /bin/bash
+
+echo $1 $2 ' > echo $1 $2'
+
+execute script with arguements
+
+./hello.sh Mark Tom
+
+You can see names get printed
+
+$0 will be the script name
+
+ How to pass arguments into an array
+#! /bin/bash
+
+echo $1 $2
+
+args=("$@")
+
+#$@ stores argument as an array
+
+echo ${args[0] , args[1] }
+
+./hello.sh Mark Tom execute and check
+
+
+echo $@ = prints all the variables at once
+
+To know number of arguements passed
+
+echo $# = this prints number of arguements passed
+
+====
+
+If statements
+
+Basic syntax of if statement
+
+#! /bin/bash
+
+if [ condition ]
+then
+	statement
+fi
+
+Integer comparison
+
+Another with comparision operator
+-eq - is equal to - if [ "$a" -eq "$b" ]
+-ne - is not equal to
+-gt - is greater than
+-ge - great than or equal to
+- lt - less than
+- le - less than or equal to
+< -  is less than ((need to use double parentheses))
+<= - less than or equal
+> - is greater tan
+>= - is greater than or equal to
+
+string comparison
+= - is equal to - if ["$a" = "$b"]
+== - is equal to - if ["$a" == "$b" ]
+!= - is not equal to
+< - is less than in ASCII [[ we need to use double ]]
+> - greater than in ASCII
+-z - string is null, has zero length
+
+
+count = 10
+
+if [ $count -eq 9]
+then
+	echo "condition is true"
+fi
+
+Run the script and check, it will print nothing as 10 != 9
+Change the vaules and check again
+
+else condition
+
+count = 10
+
+if [ $count -eq 9]
+then
+	echo "condition is true"
+elif [ $count -eq 7]
+then
+	echo "condition is tru"
+else
+	echo "condition is false"
+fi
+ multiple else condition
+
+====
+
+File test operators
+
+Most of the time we deal with files while using shell scripting
+
+#! /bin/bash
+
+echo -e "Enter the name of the file : \c"
+
+read file_name
+
+if [ -e $file_name ]
+then
+	echo "$file_name found"
+ else
+	echo "file not found"
+fi
+
+run the script and check
+
+-f flag is used to check whether if its file or not
+-e checks it exits or not
+-d checks the directories
+
+
+if [ -f $file_name ]
+
+two special files
+
+block special file -mostly objects
+character special file - content
+
+-b block special
+-c character special
+-s checks empty or not
+-r checks the read permission
+-w write permission
+-x execute permission
+
+use these blocks in script and check
+
+===
+
+Append output to the end of text file
+
+#! /bin/bash
+
+echo -e "Enter the name of the file : \c"
+
+read file_name
+
+if [ -f $file_name ]
+then
+	if [ -w $file_name ]
+	then
+		echo "Type some text.toquit presscnt+d"
+		cat >> $file_name
+	else
+		echo "The file do not have write perm"
+	fi
+ else
+	echo "$file_name not exists"
+
+Run the script and check if the file works or not
+
+====
+
+Logical AND operator with if statements
+
+&& is usually used for checkiing both the commands
+
+#!/bin/bash
+
+#Student age should be 13+ and below 30
+
+age=25
+
+if [ "$age" -gt 18 ] && [ "age" -lt 30 ]
+then
+	echo "valid age"
+ else
+	echo "age not valid"
+fi
+
+Run the script and check
+
+Another way to use and operator is as below
+if [ "$age" -gt 18 -a "age" -lt 30 ]
+if [[ "$age" -gt 18 && "age" -lt 30 ]]
+Run the code and check
+
+====
+
+Logical or operator
+
+#!/bin/bash
+
+age = 60
+
+if [ "age" -eq 18 ] || [ "age" -lt 30 ]
+
+then
+	echo "valid age"
+ else
+	echo "age not valid"
+fi
+Run and check the script
+
+Another way to use or operator
+if [ "age" -eq 18 ] -o [ "age" -lt 30 ]
+if [[ "age" -eq 18 || "age" -lt 30 ]]
+
+Run the script and check
+
+====
+
+Performing arthematic operations in shell
+
+#!/bin/bash
+
+num1=20
+num2=5
+
+echo $(( num1 + num2 ))
+echo $(( num1 - num2 ))
+echo $(( num1 * num2 ))
+echo $(( num1 / num2 ))
+echo $(( num1 % num2 ))
+
+run the script and check
+
+Alternate way using expr command
+
+echo $( expr $num1 + $num2 )
+
+for multiplication ashtricks * do not work directly. So we should use as \*
+
+echo $( expr $num1 \* $num2 )
+
+====
+
+Arthematic operations on decimals
+
+by default scripting doesn't support it. we need tools to do on decimal numbers
+
+We need to use bc = which stands for basic calculator
+
+man bc = shows arbitrary precision calculator language
+
+#!/bin/bash
+
+num1=20.5
+num2=5
+
+#bc pipe considers before it as imput for bc command
+
+echo "20.5+5" | bc
+echo "20.5-5" | bc
+echo "20.5-5" | bc
+echo "20.5/5" | bc
+echo "20.5%5" | bc
+
+In division it won't give correct answer. to solve the issue we need to set a variable scale
+
+echo "scale=2;20.5/5" | bc
+
+We can use variables in place of values
+
+echo "$num1+$num2" | bc
+
+Run the script and try
+
+Perform the square root of something
+
+#-l is or calling library in bc
+
+num=27
+
+echo "scale=2;sqrt($num)" | bc -l
+
+Run the script and check
+
+To get power of something
+
+echo "scale=2;3^3" | bc -l
+
+Run the script and check
+
+Check man bc for reference
+
+===
+
+The case statement
+
+its good for if multiple level, it enables us to match serveral values against one value
+
+Lets go with basic syntax
+
+#!/bin/bash
+
+case expression in
+	pattern1 )
+		statements ;;
+	pattern2 )
+		statements ;;
+	....
+esac
+
+Lets write a rental of vehicle for example case
+
+vehicle=$1
+
+case $vehicle in
+	"car" )
+		echo "Rent of $vehicle is 100$";;
+	"van" )
+		echo "Rent of $vehicle is 80$" ;;
+	"cycle" )
+		echo "Rent of $vehicle is 5$" ;;
+	* )
+		echo "$vehicle not available" ;;
+	....
+esac
+
+Run the script and check, provide the parameter
+
+===
+
+Case statement example
+
+Lets allow user to enter any character and based on the character we will display if its a capital or small letter or interger or special character
+
+#!/bin/bash
+
+echo -e "Enter a character : \c"
+
+read value
+
+case $value in
+	[a-z] )
+		echo "$value is a small letter" ;;
+	[A-Z] )
+		echo "$value is a capital letter" ;;
+	[0-9] )
+		echo "$value is a integer" ;;
+#? expects any one character
+	[?] )
+		echo "$value is a special character" ;;
+# * expects more than one character
+	[*)
+		echo "$value is a unknown imput" ;;
+
+Run the script and check
+
+For capital letters to run correctly
+
+Use command variable one time LANG=C
+
+LANG environment variable indicates the language and encoding, where C is the language setting
+
+===
+
+Array Variables
+
+Bash supports simple one dimentional arrays
+
+#! /bin/bash
+
+os= ( 'ubuntu' 'windows' 'kali' )
+
+echo "${os[@]}"
+
+echo "${os[1]}"
+
+echo "${!os[@]}" #prints the indices of array
+
+echo "${#os[@]}" #prints the length of the array
+
+Run script check
+
+To add elements you need to do as
+
+os[3]='mac'
+
+Run the script and see what happens
+
+To update array
+
+os[0]='mac' #this replaces the array element
+
+Removing an element from an array
+
+unset os[2] #removes third elements in os array
+
+In bash we can add  element at any index points. it prints in the sequences
+
+===
+
+While Loops
+
+The loops are used to execute the list of commands repeatedly
+
+Syntax of while loop
+
+#!/bin/bash
+
+while [ condition ]
+do
+	command1
+	command2
+done
+
+Lets take and example
+
+n=1
+
+while [ $n -le 10]
+do
+	echo "$n"
+	n=$(( n+1 ))
+done
+
+Run the script and check, it prints 1 to 10
+
+we can also increment by
+	(( n++ ))
+
+We can also use
+
+n=1
+
+while ((  $n <= 10 ))
+do
+	echo "$n"
+	n=$(( n+1 ))
+done
+
+===
+
+using sleep and open terminal with WHILE loops
+
+using sleep with the loops
+
+#!/bin/bash
+
+while [ $n -le 10 ]
+do
+	echo $n
+	(( n++ ))
+	sleep 2
+done
+
+The second Trick in While Loop
+
+n=1
+
+while [ $n -le 3 ]
+do
+	echo "$n"
+	(( n++ ))
+	xterm &
+done
+
+This open new terminals
+
+===
+
+Read a file content in file
+
+Using while loop
+
+Input redirection method
+
+#!/bin/bash
+
+while read p
+
+do
+	echo $p
+done < enterfilenamewe want to read
+
+#content in file we mentioned after done will do to file  #$p
+
+Run the script and see what happens, it prints the content
+
+Lets try second way
+
+cat filenamewewanttoread | while read p
+
+do
+	echo $p
+done
+
+Run the script and check
+
+Last method is using IFS command
+
+Internal feel separated - it is used by shell to determine how to do boundaries
+we are giving space to IFS=
+-r flag prevents the backslash escapes from being interpreted
+
+while IFS= read -r p
+do
+	echo $p
+done < filenamewewantosave
+
+Run the script and check
+
+===
+
+Using Until loops in shell scripting
+
+Runs until the command is false
+syntax
+
+#!/bin/bash
+
+until [ condition ]
+do
+	command1
+	command2
+done
+
+Example. Lets print the value 1 to 10
+
+n=1
+
+until [ $n -gt 10 ]
+do
+	echo $n
+	(( n++ )) #we can also n=$(( n+1 ))
+done
+
+we can also use double parenthesis
+
+until (( $n > 10 ))
+
+===
+
+For Loops
+Also used to list over some values
+Lets see basic syntax of for loop
+#!/bin/bash
+
+for VARIABLE in 1 2 3...N
+do
+	commmand1
+	command2
+done
+
+or
+
+for variables in file1 file2
+do
+	commmand1
+	command2
+done
+
+or
+
+for OUTPUT in $(Command)
+do
+	commmand1
+	command2
+done
+
+or
+
+for (( EXP1; EXP2 ))
+do
+	commmand1
+	command2
+done
+Lets write some examples
+
+#!/bin/bash
+
+for i in 1 2 3 4
+do
+	echo $1
+done
+This printe 1 to 4
+
+we can use
+for i in {1..10} #this is means we can to iterate 1 to 1
+for i in {1..10..2} #this improves value by to 2 loop
+Run the script and check. This works only on 4+ version of bash Try $BASH_VERSION to check
+
+for (( i=0; i<5; i++ ))
+do
+	echo $i
+done
+
+Run the code and check
+
+===
+
+For loop with some commands
+
+#!/bin/bash
+
+
+for command in ls pwd date
+do
+	echo ".....$command....."
+	$command
+done
+
+Run the scrypt and check
+
+Lets print directores in the folder
+
+for item in *
+do
+	if [ -d  $item ]
+	then
+		echo $item
+ 	fi
+done
+
+Run the script and check
+
+====
+
+Select loop
+
+#!/bin/bash
+
+select varName in list
+do
+	command1
+	commandN
+done
+
+example
+
+select name in mark john tom
+do
+	echo "$name selected"
+done
+
+Run the script, it shows the list of names aas menu with number. then prompt will ask to give any number from the list. Write a number and that number item gets selected
+
+structure
+
+select name in mark john
+do
+	case $name in
+	mark )
+		echo "mark selected" ;;
+	john )
+		echo "johnselected" ;;
+	* )
+		echo "Error, Please provide num 1 or 2" ;;
+	esac
+done
+
+===
+
+Break and Continue
+
+break statement is used to exit current loop
+
+#!/bin/bash
+
+for (( i=1; i<=10; i++ ))
+do
+	if [ $i -gt 5 ]
+	then
+		break
+	fi
+	echo "$i"
+done
+
+The break keyword breaks the loop when value goes higher than 5 as shown in above script
+
+Run the script and check
+
+Lets see how to use continue statement
+
+Continue skips the normal execution and then the program geos to next iteration
+
+for (( i=1; i<=10; i++ ))
+do
+	if [ $i -eq -o $i -eq 6 ]
+	then
+		continue
+	fi
+	echo "$i"
+done
+
+Continue now skips the execution whenever it sees 3 and 6. It prints 1 to 10 but skips 3 and 6
+
+====
+
+Functions
+
+Bash also supports functions but some limitations are with bash.
+
+Function is a code block that implements set of operations
+
+Users can use the functions once or multiple times
+
+Two ways of using functions
+Syntax
+
+function name() {
+	Commands
+}
+
+Second syntax
+
+name () {
+	commands
+}
+
+Lets write a sample function
+
+#!/bin/bash
+
+function Hello () {
+	echo "Hello"
+}
+
+quit () {
+	exit
+}
+
+#To use a function in a script, we just call it
+
+Hello
+
+Run the script and check
+
+If we write quit above hello and the script quits before calling function and descrits after script
+
+Function declartions can be done in any sequence but calling function should be proper.
+
+Passing arguement to a function
+
+function print(){
+	echo $1
+}
+
+print Hello # this is arguement $1
+
+We can also call a function mutiple times.
+
+===
+
+Local Variables
+
+by default we declare global variables in the script
+
+Lets use a function to print the name
+
+#1/bin/bash
+
+function print(){
+	name=$1
+	echo= "The name is $name"
+}
+
+name="Tom" #The varible can be declared here too
+
+echo "The name is $name"
+
+print Max
+
+Run the script, it should print tom name firest then max name second
+
+We can add local command to add local varibles for inside function. eg
+
+function print(){
+	local name=$1
+	echo= "The name is $name"
+}
+
+name="Tom"
+print Max
+
+echo "The name is $name"
+
+Now print and check, You can see the variable is local to the function
+
+====
+
+Function Example
+
+We will be creating a funciton that checks a file exits or not
+
+arguement will name of file. The script checks if the file exists or not
+
+#!/bin/bash
+
+usage(){
+	echo "You need to provide an arguement : "
+	echo "usage : $0 file_name"
+}
+is_file_exist() {
+	local file="$1"
+	[[ -f "$file" ]] && return 0 || return 1
+} 1 && con2
+
+# $# returns number of arguements
+
+[[ $# -eq 0 ]] && usage
+
+if ( is_file_exist "$1" )
+then
+	echo "file found"
+else
+	echo "file not found"
+fi
+
+Run the script and check
+
+===
+
+readonly command
+
+read only commands can be used with variables and shell. They can read only, cannot be overwritten
+
+#!/bin/bash
+
+var=31
+
+readonly var
+
+#we cannot reassign value to var, if we do, it throws an #error
+
+var=50
+
+echo "car => $var"
+
+run the script and check
+
+hello() {
+	echo "Hello World"
+}
+
+# to make functions read only, we need to use -f flag
+
+readonly -f hello
+
+#Now if we want to overwrite the function, it cannot #happen
+
+# What happens if write readonly at the end,
+# The script shows all the read only variables in terminal
+
+readonly
+
+readonly -p #gives almost same results
+
+readonly -f #shows read only functions
+
+===
+
+signals and traps
+
+trap statement
+
+#!/bin/bash
+
+#$$ is used to print pid of script
+
+echo "pid is $$"
+while (( COUNT < 10 ))
+do
+	sleep 10
+	(( COUNT ++ ))
+	echo $COUNT
+done
+exit 0
+
+Try running the script and kill -9 process id
+
+There are scenerios in which process can be interupted
+Thats why we use trap command
+Trap commands provides the script to trapchure and interupt and provide within the script
+In terminal
+
+MUST CHECK
+man 7 signal #This shows the man page signal, #explanation, below signal table you can see full details
+
+Now lets use trap in script
+
+trap "echo Exit command is detected" 0
+
+echo "Hello world"
+
+exit 0 #0 is a sucess signal
+
+Lets try another
+trap "echo Exit signal detected" SIGINT
+
+echo "pid is $$"
+while (( COUNT < 10 ))
+do
+	sleep 10
+	(( COUNT ++ ))
+	echo $COUNT
+done
+exit 0
+
+Run the script then interrupt the script and check. now it prints error but continues the process
+
+Now try with SIGKILL
+
+trap "echo Exit signal detected" SIGKILL
+
+This time it won't show exit signal. Trap cannot catch SIGKILL and SIGSTOP
+
+===
+
+signals and traps
+
+Lets take one more example and try
+
+Create one file in the directory nameed file.txt
+
+Whenever we recieve a signal the script should delete the file.
+#!/bin/bash
+file=path of file
+trap "rm -f $file && file deleted; exit" 0 2 15
+
+echo "pid is $$"
+while (( COUNT < 10 ))
+do
+	sleep 10
+	(( COUNT ++ ))
+	echo $COUNT
+done
+exit 0
+
+Run the script, kill the script kill -15 pid. The file.txt should get deleted
+
+How can we remove traps
+
+in terminal
+
+trap - 0 2 15 #here 0 2 15 are mentioned in script so #we removed here
+
+===
+
+Debugging our script using bash
+
+Determine what cause script to fail
+
+The most common is the start with - subshell
+
+#!/bin/bash
+
+file=path of file
+trap "rm -f $file && echo file deleted; exit" 0 2 15
+
+echo "pid is $$"
+while (( COUNT < 10 ))
+do
+	sleep 10
+	(( COUNT ++ ))
+	echo $COUNT
+done
+exit
+
+In terminal to debug
+
+bash -x ./nameof script
+
+This command shows the errors in the file
+
+We can use set option if we don't want to run debug in terminal
+
+#!/bin/bash -x
+
+# -x can also be used this way. Run script and check
+
+#!/bin/bash
+set -x
+
+#set -x activates the debugging from the point its written
+
+One more option is set +x
+
+# set+x deactives or stops debugging
+
+syntax
+
+set -x
+
+script
+
+set +x
+
+
