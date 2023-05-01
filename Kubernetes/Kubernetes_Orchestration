@@ -1,0 +1,342 @@
+Orchestration with Kubernetes
+
+In this module
+
+Complex kubernetes orchestration
+Using Kubernetes in Realtime projects
+
+Introduction to K8s
+Main K8s components
+
+Install Minikube and kubectl - Local setup
+
+Main Kubectl commands
+
+YAML configuration files
+
+Demo Project
+
+Organize components using namespaces
+
+Configure connectivity services
+
+Make App available from outside using ingress
+
+Persist Data - volumes
+
+configmap &secret as Volume Types
+
+Deploy stateful Apps - Stateful set
+
+Package Manager of K8s -Helm
+
+Microservices in K8s
+
+Introdction to k8s 
+
+Demo Project - Deploy microservices application
+
+Production and Security Best practices
+
+Demo Project - Creating common helm chart, 
+ -1 blueprint for deployment
+ - set values for individual microservices
+
+Demo Project - Declarative way using a Helm file
+
+Concept of authorization in k8s using role based access control
+
+===
+
+Introduction to Kubernetes
+
+Defination
+
+K8s is open source container orchestration tool developed by google.
+
+It manages containers -
+
+K8s helps to manage application that made of thousands of container in different environment
+
+Problems solved by k8s
+
+Rise of microservices - Trend from Monolith to Micro
+
+Demand for a proper way of managing those hundreds sof containers
+
+Features of k8s
+
+High availability or no downtime
+
+Scalability or high performance
+
+Disaster recovrey - backup and restore
+
+
+===
+
+Main Kubernetes components
+
+Lets build a case with simple java app and database
+
+- Node and pod
+
+Smalles unit of kubernetes is pod. pod is abstration over container
+
+It creates a running environment over the server
+
+We need to only interact with kubernetes layer
+
+Pod is usually meant to run one application inside it. We can run more but usually its used for 1.
+
+One pod for database
+
+Kubernetes offer a virtual network which means each pod gets its own IP address. They can communicate it using IP address
+
+However pod components are epemeral which means they can die easily. If the container crashes the application crashes inside it.
+
+The new one will get created in its place. A new internal IP gets assigned in its place.
+
+To overcome this issue. K8s service is used
+
+Service is basically a static ip address that can be attached to each pod.
+
+Lifecycle of service and pod are not connected so even if pod dies, the ip address of new pod will be same.
+
+App can accessible through browser
+
+Ingress service recieves request from outside then sends it to service then service sends it to the working pod.
+
+Config map and Secret
+
+Application will have a database end point. So where do we configure it.
+
+We usually do it in application property file. Database URL usually in the built application.
+
+Kubernetes have a component called config map.
+
+Configmap usually container configuration data like URL's of database. In k8s we connect it to pod so that pod gets the data from database.
+
+Pod of the external configuration may be username and password. In this case it may also change. So we don't directly put in it configmap.
+
+For this purpose we have secret. It is used to store secret data like credentials. Base64 encoded format.
+
+
+===
+
+
+Config map and Secret
+
+Application will have a database end point. So where do we configure it.
+
+We usually do it in application property file. Database URL usually in the built application.
+
+Kubernetes have a component called config map.
+
+Configmap usually container configuration data like URL's of database. In k8s we connect it to pod so that pod gets the data from database.
+
+Pod of the external configuration may be username and password. In this case it may also change. So we don't directly put in it configmap.
+
+For this purpose we have secret. It is used to store secret data like credentials. Base64 encoded format.
+
+The built-in security mechanism is not enabled by default.
+
+We can use data from configmap and secret like variables
+
+We have seen pod, service, ingress, configmap, secrets
+
+Volumes
+
+Data storage and how it works in K8S
+
+if data pod gets restarted the data would be gone. To solve this issue
+
+we need another component called Volumes.
+
+It attaches physical storage to the pod. It can be remote or outside k8s cluster.
+
+K8s doesn't manage data persistance
+
+Deployment and StatefulSet
+
+What happens if application pod dies. it would create some downtime.
+
+We replicate everything so the data would be send a running application.
+
+Service has two functionalities, one is permanent IP and other is like a load balancer
+
+In order to create a replica, we define blueprint for the application and mention replicas.
+
+The other component is called Deployment. We can create deployments
+
+In practice we would mostly work with deployments
+
+====
+
+
+We can't replicate a database using Deployment
+
+The reason for it is because database has a state.
+
+This is offered by another K8s component called StatefulSet
+
+Database should be created using Statefulset and not deployment.
+
+Deployment for stateLess Apps
+
+StatefulSet for StateFUL Apps or Databases
+
+Stateful set takes care of replicating database pods
+
+Deploying Database using StategulSet is not easy
+
+Its also common practice to host dabase outside K8s cluster.
+
+Wrap Up
+
+Main K8s components
+
+Pods, Services, Ingress, External configuration using Configmap and Secrets, Volumes,
+
+Pod blueprints like Deployment and StatefulSet
+
+
+===
+
+Kubernetes Architecture
+
+Two types of nodes k8s notes operates
+
+Master - Node
+
+Node Processors
+
+Node contains pods, each node will have multiple pods running under it
+
+3 processors must be installed in every node.
+
+Worker nodes do the actuall work
+
+container runtime needs to installed on everynode
+The process that actually schedules those pods is kubelet.
+Kubelet interates with both node and container.
+Kubelet starts the pod with a container inside.
+
+K8s cluster has number of nodes, pods and containers
+
+The commution between them happens through service component.
+
+Third process that is responsible for forwarding traffic is Kube Proxy. It must be installed in node.
+
+It routes traffic properly
+
+1. Kubelet
+2. Kube Proxy
+3. Container Run-time
+
+How do we interact with this cluster?
+
+All the managing process are done by Master Nodes
+
+Master Process has 4 processes running inside them
+
+1. API Server (When user wants to deploy, user interacts with API Server) It is like a cluster gateway. It also acts as a gatekeeper for authentication.
+
+2. Scheduler (once we send request to API Server it will validate and hands it over to scheduler. Scheduler decides where to put the pod in worker node. it will se how many resources the pod requires and selects the best option )
+
+3. Controller Mangaer (When pods die in node, it detect the state changes and tries to recover the cluster state. It makes the request to the schedule to restart then using kubelet pod restarts)
+
+4. etcd (We can think this as a cluster brain. All the changes in the cluster gets stored in etcd.)
+
+===
+
+Example Cluster Setup
+
+In small cluster
+
+we usually have 2 masteres and 3 nodes
+
+Masters requires less resource and nodes require more resources.
+
+Depends on application complexity, we can add more masters and nodes
+
+====
+
+Minikube & Kubectl - Local Setup
+
+What is Minikube
+
+What is Kubectl
+
+Setup-up Minikube cluster
+
+Production Cluster Setup
+
+two masters and multiple worker nodes
+
+Separate virtual machines
+
+To test on local machine, setting up a cluster like this is costly. To solve this issue. An open source tool minikube can be used
+
+Minikube is one node cluster where master processes and worker processes run on same machine.
+
+Docker pre installed
+
+It runs on laptop through virtual box
+
+Minikube creates a virtual box on our laptop
+
+Node runs in that virtual box
+
+To interact with this cluster. We use Kubectl
+
+What is Kubectl
+
+Kubectl tool is a command line tool for K8s.
+
+Kubectl helps to talk with API Server in Master Node.
+
+Kubectl is the tool used to interract.
+
+Insta
+
+===
+
+Installation & Create Minikube cluster
+
+Installation
+
+Go to Kubernetes, Documentation, on the side bar
+We see Install tools, install minikube, Select os
+
+Vitualization on your machine needed.
+
+Install Hypervisor
+
+Minikube has Kubectl as dependency so with Minikube Kubectl directly gets installed
+
+Check the commands
+
+minikube
+
+kubectl
+
+#Lets create a minikube cluster
+
+minikube start --vm-driver=hydervisor name
+
+It will download some dependencies and launches K8s
+
+The has docker as preinstallation.
+
+kubectl get nodes = shows the list of the nodes
+
+status should be ready by now
+
+minikube status = shows status of minikube
+
+kubectl version = shows version of k8s
+
+kubectl cli is for configuring the minikube cluster
+
+minikube cli si for startup/deleting the cluster
