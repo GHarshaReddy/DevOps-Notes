@@ -1,0 +1,68 @@
+Most Important Linux Commands
+
+GREP - Global Regular expression print
+
+If we want findout a word from long file, we can use grep 
+
+cat filename | grep "word" = This shows lines with the given word
+We can also use grep "word" --color
+
+SED - Stands for stream editor 
+
+It is used for substitution, find and replace words.
+Also used for text manupulation and deleted
+eg:
+
+echo hi bro | sed 's/hi/bye'
+
+echo hi bro | sed 's/hi/bye/g' = changes all with hi
+
+will be turned to bye
+
+cat filename | sed 'saba/s/hi/bye' = Here we used /s in between so, it will look for lines which has saba word in it then it will replace hi to bye
+
+cat filename| sed 's/hi/bye;s/hello/jello' = changes multiple words using ;
+
+cat filename | sed 's/^/https;\/\//' = Adds https:// to starting of all lines
+
+hat ^ is used when we want to find something intial of the file. $ is used when we want to find something at the end of the file. d is used for deleted.
+
+cat filename | sed '/^$/d' = Removes all the white pages in the file
+
+-r flag = rejects 
+
+cat filename | sed -r 's/[0-9]//'
+
+-y flag is used for transformation 
+
+cat filename | sed 'y/[a..z]/[A..Z]' = characters will turn to capitals
+
+cat filename | sed '-e 's/com/abc' -e 's/in/abc' = replaces com with abc and in with abc. -e flag helps to run multiple commands in single line
+
+====
+
+AWK Command
+
+Aho, Weinberger Kernighan
+
+Its not just a command, its a kind of small scripting language used by many programmers
+
+Lets say if we have a long document and we find a word 'shifa' and what to do when we find the word can be done with awk
+
+cat filename | awk '{print $1}' = prints the first column of the lines
+
+cat filename | awk '/shifa/ {print $2}' = finds the liens which has the word shifa and prints second column of it
+
+-F helps to find paticular word or character
+
+cat filename | aws -F '.' '{print $1}' = prints column 1 before dot
+
+aws '{s+=$1} END {print s} filename = adds sum of the values of colum 1
+
+Task
+
+Try editing big file in linux using grep, sed, and awk
+
+sort -u = removes duplicate results
+
+
