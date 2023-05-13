@@ -1,0 +1,1068 @@
+Jenkins
+
+Develop application => check changes to git => This should be tested and build
+
+We need a dedicated servers to do this
+
+test to be run, application to be build and saved
+
+ To do this, test environment shold be prepared
+docker credentials should be configured and neccessary tools should be installed
+configure trigger build automatically
+
+test  code => build app => push to repository => deploy to server
+
+This process is called build automation and the most used tool for build automation is Jenkins.
+
+What can we do with jenkins
+
+Run tests
+build artifacts
+publish artifacts
+deploy artifacts
+send notifications
+
+Jenkins need to integrate with other tools such as repositories, docker, build tools, deployment service
+
+Jenkins uses plugin to do this work
+
+Example:
+
+Appp hosted in github with java tech and we can consider plugin to automate process for creating docker images and pushing then deploying in Ec2 instance
+
+=======
+
+How does Jenkins work?
+
+What we need to configure
+
+Run tests = Build tools should be available
+
+with build tools, we execute test command, npm tests, gradlew test, mvn test ...etc
+
+configure test environment to run tests against
+
+Build Application such as docker image we need docker 
+and publish docker image we should have credentials and credentials plugins can be used
+
+We need to install jenkins and prepare everything before we start
+
+Good thing is one time setup and good to go
+
+
+plugins, can be used for multiple projects one setup
+
+====
+
+
+Installing Jenkins
+
+2 ways to install
+
+1) directly download package and install on server
+create separate jenkins user
+
+2) Run jenkins as docker container and server
+
+Lets create an instance and run
+
+Jenkins needs atleast 1gb of ram
+
+lets choose 4gb ram and 2 cpus
+
+Port 8080 should be open jenkins
+
+apt install docker
+
+docker run -p 8080:8080 -p 50000:50000 -d -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+
+Port 50000 uses as communication between jenkins master and node
+
+Jenkins can also be build and start as a cluseter, if needed
+
+Jenkins just like nexus is gonna store a bunch of data, so we need data persistance
+
+Now we can access the jenkins from our server
+
+Provide initial admin password as shown in the screen
+
+Enter the docker container and check for details
+
+You can also check the details using docker volume
+
+docker volume inspect jenkins_home = shows point path for volume
+
+You can see Initial password details here
+
+Initialize Jenkins using password
+
+Install plugins and create admin user
+
+
+===
+
+
+Jenkins UI
+
+ Jenkins also have two roles,
+
+Jenkins administrator
+
+Settingup cluster
+install plgins
+backingup data
+managing jenkins
+
+Jenkins Users
+
+Groups of developers
+devops teams
+creating jobs to run workflows
+
+To create a new job, we do by using new item optioin
+
+===
+
+Installing build tools
+
+Frstt thing we need to do is to automatte the apps work flow .. to do it as follow
+
+requisties
+
+Java App
+
+Java app with maven build tool
+Run tests
+Bild Jar file
+
+To do this, Maven needs to be available on Jenkins
+we need npm for javascript
+depending on programming language we need tools
+
+One way to do it is using plugins
+
+second way is to install those tools directly on server
+
+In this case we need to install in jenkins container
+
+
+Lets try starting Configure with maven plugin
+
+In global tool configuration we can manage all the available tools.
+
+Mange plugins => Add maven
+
+Name maven-3.6
+install automatically
+
+or ew use add installer and run shell command. optional
+In this case we use install automaticaally
+
+Now we should have maven commands available in whole jenkins server
+
+===
+
+We are gonna be using maven in our jobs
+
+Now lets install npm and Node in jenkins container
+
+Enter into docker container
+
+enter as root user
+
+docker exec -u 0 -it cont name bash
+
+check os
+
+cat /etc/issue = shows linux destributioin
+
+apt update
+
+apt install curl
+
+Using curl download script from deb nodesource this will have commands for nodejs npm
+
+ls
+
+you will get a script, now execute the script
+
+apt install nodejs
+
+Now nodejs and npm will be download
+
+===
+
+Create simple freestyle job and plugin configuration
+
+Now we have npm and maven configured in Jenkins
+
+In Jenkins
+
+New item => name my job => we can see list of pipes jobs below. Now lets choose freestyle project (This type of build can be helpful to test and build the app). We wil also use pipeline and multibranch pipeline in coming videos
+
+Lets go with freestype first.
+
+On configuration section we have bunch of check boxes on top,
+
+scroll down to build part
+
+Add build step => execute shell
+
+this will allow us to execute the shell comand. try
+
+npm --version
+
+Maven we can't run here because maven isn't installed in the container. it is installed in the server. So in order to run maven
+
+Add build step => Invoke top level maven targets
+
+Maven version => choose version
+Goals => --version (we can pass in any command of maven)
+
+Check maven goals for knowledge
+
+Now try building the job and check
+
+You can in what happened in console output and check
+
+===
+
+Two things we want to know about build tools
+
+Even though intalling tools on server is hard it provides more options
+
+Installing in server is flexible but has limited usage because it gives pre configured area
+
+If we want script something then server installing is more helpful.
+
+How we can configure nodejs using pluging
+
+go to manage plugins add nodejs plugin
+
+Now go to global tool configuration and you can see nodejs to configure
+
+To configure
+
+add nodejs
+
+give it a name = my-nodejs
+choose version
+check install automatically
+
+save it
+
+Go back to the freestyle job
+configure
+Add build steps
+
+Now we see execute nodejs scripts
+
+Plugins UI are different from each other.
+
+===
+
+Configure git repository
+
+So now we have build that is executing two commands but it not connected to any repository
+
+To do it
+
+Go to job configure
+
+In source code management tab
+
+we can git option, if we had installed git plugin
+
+Click on git
+
+teaching with nana repo - gitlab.com/nanuchi/java-maven-app
+
+Add repository url - https url
+
+Jenkins need credentials to authenticate in order to clone and fetch the repo
+
+Click on add credentials
+
+Jenkins credentials provider: Jenkins
+
+enter ID username and passsword
+
+ID is the name of credentials we can reference with eg gitlabid
+
+Now we have entered crentials
+
+We can configure which branch to build and we can also specifiy to build multiple branches at once
+
+We still haven't configured any build steps but still lets run it and check
+
+====
+
+You can see it in console output..
+
+Your git repo will also be fetched to jenkins into our jenkins job
+
+Whenever we add a gitrepo
+
+Jenkins checks in local space in order to run the git repository
+
+So if we are running tests it will check the code locally and test the code
+
+Go to Go to jenkins container
+
+and ls /var/jenkins_home/
+
+Here we will see bunch of different data that holds jenkins configuration that holds plugins and credentials and jobs
+
+in Jobs => every time we create a job, it gets created here and each job gets a folder and relevant data of the jobs
+
+In the jobs we can see builds
+Inside builds we can see log files
+
+In workspace folder on jenkins_home
+We can see two folders inside it, we can see git repository checkedout here locally
+Also oa tmp folder will be created to store data temporarily
+
+Do something from git repo in jenkins job
+
+Now lets go to git repo
+
+Create a branch with one frestyle shell script.sh inside it write npm --version
+
+Now in Jenkins configure, change branch in git section
+
+In execute shell npm on build section
+
+use command
+
+chmod -x shellfilename
+./freestyle.sh (this is shell file name on repo)
+
+Save it and build then checkout console output
+
+Now run tests and build java application
+
+Using Java maven app and build .jar application
+
+
+===
+
+Using Java maven app and build .jar application
+
+Create a freestyle job
+
+java-maven-build
+
+in SRC add git repo
+
+add credentials
+
+branch jenkins jobs
+
+In build part
+
+Invoke top laven maven targets
+
+version
+
+Goals = test
+
+Add one more build
+
+Goals package
+
+In branch we will have on small Apptest.java that should  run the tests and .jar should be created
+
+Build the job and check console output
+
+Repo check => Run tests => Build Jar file
+
+Now go to jenkins container
+
+cd /var/jenkns_home/workspace/
+
+here we can see job name
+
+====
+
+Docker in Jenkins
+
+Make docker available in jenkins
+
+Attaching a volume to jenkins from the host file can help to do it
+
+Jenkins server should have docker intalled in it. In this case we are using jenkins as a container in the server so docker is already installed
+
+We are gonna mount docker run time directory to into docker container as a volume
+
+Now we need to start the container again with new volumes and additional volumes
+
+docker stop contname
+
+create new container
+We have mounted persistant volume data in /var/jenkins_home on the server. We still have jenkins data on the server. Now we can remount it to the new server to keep all the data
+
+check the volume
+docker volume ls
+
+We need to attach this to new container
+
+docker run -p 8080:8080 -p 50000:50000 -d -v jenkins_home;/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):/usr/bin/docker jenkins/jenkins:lts
+
+Execute the command
+
+The second two volumes will make docker available and docker commands avaialbale inside jenkins server
+
+This time we don't need configure jenkins from beggining again
+
+Refresh the UI server and jenkins
+
+Enter the credentials and login to jenkins
+
+Now enter into container and check whether docker is available or not
+
+but jenkins user inside container willnot have permissions for docker.sock
+
+To fix this issue
+
+ls -l /var/run/docker.sock
+
+now permissions are shown but it will be for root.
+
+leave container and login as root user
+
+docker exec -u 0 -it contid bash
+
+now add permissions to docker.sock
+
+====
+
+chmod 666 /var/run/docker.sock
+
+now check with ls -l
+
+Now login again as jenkins user and check
+
+docker pull redis
+
+This should pull the image now
+
+Next step we are gonna build a docker image from our jar file package
+
+If we go to builld config and build steps, We can execute docker commands from shell section
+
+ Add a docker file in jenkins repository
+
+Dockerfile
+
+FROM openjdk:8-jre-alpine
+
+EXPOSE 8080
+
+COPY ./target/java-maven-app-1.0-SNAPSHOT.jar /usr/app
+
+WORKDIR /usr/app
+
+ENTRYPOINT ["java", "-jar", "java-maven-app-1.0-SNAPSHOT.jar"]
+
+Gitrepocheckout => run tests=> build jar file => build image
+
+Now we need to go to job config
+
+Add execute shell and in command write
+docker build -t java-maven-app:1.0 .
+
+Save the config and build the project, check consoleoutput
+
+Now we can see images in the serviers
+
+====
+
+Next step we can configure jenkins build and push that image into dockerhub
+
+First step to do it is add credentials
+
+Create a private repo in docker hub
+
+Now create credentials in jenkins for docker hub
+
+Go to manage credentials
+inside jenkins store
+add credentials
+add username
+add password
+docker-hub-repo id to recall
+
+Now lets go to build configure
+
+in execute shell command
+
+We need to tag the docker image with dockerhub repository to push
+
+Tag the image using repository name - This can be seen in dockerhub private repo ui right side
+
+docker build -t nanajanashia/demo-app:1.0 .
+
+(In buildenvironment section check use secret texts or files then add binding below it. Binding plugins allows us to use credentails we created in jenkins Choose username and password separated)
+
+(Define variable username USERNAME, PASSWORD
+choose credentials in below section
+Now can use variables to login
+)
+
+docker login -u $USERNAME -p $PASSWORD
+docker push nanajanashia/demo-app:jma-1.0
+
+docker hub is default repo for docker so we don't need to specify urls
+
+This configuration will build the app with correct tag
+
+Now build the job and check the result
+
+Go to dockerhub and see the pushed image
+
+We can do one more optimzation for safety
+
+The best way of using password as a standard input instead of CLI parameter
+
+To do it
+
+echo $PASSWORD | docker login -u $USERNAME --password-stdin
+
+This will solve the error
+
+===
+
+Lets push docker image into nexus repository
+
+Open nexus repository
+
+In the browser section
+
+Choose a repo here
+
+We want to push from jenkins to here
+
+Lets configure in Jenkins server
+
+In deamon.json file, we can configure the insecure registers to ignore
+
+vim /etc/docker/daemon.json
+
+In the file
+
+{
+	"insecure-registries": ["add the ip and port"]
+}
+
+:wq!
+
+Restart the docker so the change can be applied
+
+Restarting docker kills the container. So jenkins need to be restarted
+
+docker start cont name
+
+We need to reconsider the permission for docker.sock file
+
+Go inside the container
+docker exec -u 0 -it contname bash
+
+chmod 666 /var/run/docker.sock
+
+Now we can configure the jenkins job to push to nexus repo
+
+Lets create credentials for nexus
+Go to credentials in enkins
+add credentials
+username and passsword, id
+
+Now in java-maven build, binding change to nexus
+
+In Execute command shell
+
+docker built -t nexusip:port/java-maven-app-1.1 .
+echo $PASSWORD | docker login -u $USERNAME --password-stdin ipandportofnexus
+docker push ip:port/java-maven-app:1.1
+
+Now build and check console output
+
+Go to next and check broswer for java-maven-app
+We can alsoo check jenkins server with docker images
+
+We have successfully build and pushed to nexus repositories
+
+===
+
+Freestyle to Pipeline Job
+
+Build java app => run tests => Build image => Push to private repo
+
+Freestyle job for 1 job/step is good practice
+
+freestyle process has some limitations  such as configuration via UI is not available
+
+chained freestyle jobs are not enough to setup complex jobs
+
+Now pipeline type jobs are used
+
+Pipeline jobs
+
+Suitablle for CI/CD
+Scripting - pipeline as a code
+
+===
+
+Simple pipeline job
+
+Lets create a my-pipeline
+
+In configuration view,
+
+Go to Pipeline part by scrolling down
+
+We will have two options, Pipeline scrpt and pipeline script from SCM
+
+Script is written in groovy
+
+programming language similar to java but less complex
+
+We can also see sample scripts on right side bar
+
+Check groovy sandbox (This means we can use limited no of groovy functoin without getting approval from jenkins admin)
+
+We can write the whole script here but however the best practice is to use from SCM
+
+We should have groovy script together in our SCM together with out application
+
+In pipeline choose pipeline scrpt from SCM
+
+then git
+
+then add repo url and use credentals
+
+then set the branch jenkins-jobs
+
+script path = Jenkinsfile (It will check for a file called Jenkinsfile)
+
+Save the job
+
+===
+
+Lets create a jenkins file and run the pipeline
+
+Jenkinsfile is a standarized name
+Pipeliine syntax
+
+pipeline {
+
+	agent any
+
+	stages {
+		stage("build") {
+			steps {
+			}
+		}
+	}
+}
+
+Jenkins file can be written as a scripted pipeline or declarative pipeline
+
+Scripted
+
+first syntax
+groovy script
+advaced scripting capabilities, high flexibility
+difficult to start
+
+Declarative suntax
+
+more recent addition
+easier to get started but not powerful
+pre defined structure
+
+Required files of Jenkinsfile
+
+pipeline {} = must be top level
+agent = where to execute
+stages{} = where the whole work actually happens
+stage{} and steps {} = where work done
+
+eg build stage, test stage, deploy stage and steps inside
+
+inside the steps, the script goes that executes on jenkins server
+
+eg
+
+steps {
+	echo "building the application"
+}
+
+===
+
+First practice file
+
+pipeline {
+
+	agent any
+
+	stages {
+		stage("build") {
+			steps {
+				echo "Building app"
+			}
+		}
+		stage("test") {
+			steps {
+				echo "testing app"
+			}
+		}
+		stage("deploying") {
+			steps {
+				echo "deploying app"
+			}
+		}
+	}
+}
+
+Now build the pipeline and check the process
+we will also get UI view of stages
+
+We haven't writtent declaritve checkout SCM script here but we can see it in UI
+
+This pipeline helps in doing multiple tasks, tasks in parallel
+user inpuy
+conditional statements
+We can also set variables
+removes stress of managing multiple jobs
+
+====
+
+Jenkinsfile syntax
+
+Post attribute in Jenkinsfile
+
+at the end of jenkins fle just before ]
+
+This can be used to execute logic after all stages are executed
+
+Conditions: always , success, failure
+
+Mostly we define buld state or build status changes in post attribute
+
+we can use post attribute
+
+	post {
+		always {
+			//
+		}
+		success{
+			//
+		}
+		failure {
+			//
+		}
+	}
+}
+
+We can also define expressions or conditionals for each stage
+
+eg
+
+pipeline {
+	agent any
+	stages {
+		stage("test") {
+			when {
+				expression {
+					env.BRANCH_NAME == 'dev'
+				}
+			}
+			steps {
+				echo "testing"
+			}
+		}
+	}
+}
+
+===
+
+Environment variables in Jenkinsfile
+
+jenkins provides some env varibales such as BRANCH_NAME
+
+to know available variables in jenkins
+
+ip:port/env-vars.html
+
+In addition to jenkins provide, we can define our own vars below agent any
+
+
+
+
+
+
+
+
+We can also define expressions or conditionals for each stage
+
+eg
+
+pipeline {
+	agent any
+	environment {
+		NEW_VERSION = '1.3.0'
+	}
+	stages {
+		stage("test") {
+			when {
+				expression {
+					env.BRANCH_NAME == 'dev'
+				}
+			}
+			steps {
+				echo "testing"
+				echo "building ${NEW_VERSION}"
+			}
+		}
+	}
+}
+
+====
+
+Defining credentials in Jenkins
+This can also be done in script below agent any and in environment section as shown below
+For this we need jenkins binding plugin
+
+
+
+
+
+We can also define expressions or conditionals for each stage
+
+eg
+
+pipeline {
+	agent any
+	environment {
+		NEW_VERSION = '1.3.0'
+		SERVER_CREDENTIALS = credentials('server-credentials')
+#('server-credentials') is id provided in jenkins plugin
+	}
+
+	stages {
+		stage("test") {
+			when {
+				expression {
+					env.BRANCH_NAME == 'dev'
+				}
+			}
+			steps {
+				echo "testing"
+				echo "building ${NEW_VERSION}"
+				sh "${SERVER_CREDENTIALS}"
+#another way
+				withCredentials([
+					usernamePassword(credentials:id), usernameVariable: USER, passwordVariable: PWD)
+				]) {
+					sh "some script ${USER} ${PWD}"
+			}
+		}
+	}
+}
+
+Two plugins are mandatory for this, one is credentials and other is crentials binding plugin
+
+Tools attribute for build tools
+
+====
+
+
+Tools attribute for build tools
+
+This helps in accessing build tools for the project, eg: maven
+
+The tools should be installated and available in jenkins. Name on installation should be quoted in jenkinsfile
+
+Jenkins file supports gradle, maven and jdk
+
+eg
+
+pipeline {
+	agent any
+	tools {
+		maven 'Maven'
+#This will make maven commands available in jenkins file
+	}
+
+Parameterss in Jenkinsfile
+
+ if we want to provide some external configuration to our build
+
+Parameters are writtenn below agent
+
+pipeline {
+	agent any
+	parameters {
+		string(name: 'VERSION', defaultValue: '', description: ''' )
+#We can use multiple parameters, instead of string we can use choice
+		choice(name: 'VERSION', choices: ['1.1.0', 1.2.0,], )
+		booleanParam(name: 'executeTests', defaultValue: true
+	}
+
+Now we can use the parameters in stages as shown,
+In when expresspion we can use the parameter
+
+	stage("test") {
+		when {
+			express {
+				params.executeTests == true
+			}
+		}
+	}
+		steps {
+			echo ""testing"
+		}
+
+
+Add all this script in jenkins file and check
+
+Now build the pipeline and check
+
+We can see Build with Parameters option on Jenkins job UI after running build
+
+Build again , at this time it show some options before build
+
+
+====
+
+Using external groovy script in Jenkins
+
+Instead of long file, we can call scripts inside Jenkinsfile
+
+	stage("build") {
+		steps {
+			script {
+#we can import script here
+			}
+		}
+	}
+
+	stage("init") {
+		steps {
+			script {
+				gv = load "script.groovy"
+			}
+		}
+}
+
+Create another file
+vim script.groovy
+
+#we can write the long script here
+
+def testApp() {
+	echo "testing the application"
+}
+
+return this
+
+Basically all the environment variables in Jenkinsfile are available in groovy script
+
+to call on steps
+
+use
+		script {
+			gv.testApp()
+}
+
+Execute the script the and check
+Make sure add groovy.script file in repo
+
+
+If we check reply in build log we can edit jenkinsfile and groovy.script in the UI
+
+
+====
+
+
+Input parameters in Jenkins
+
+example
+
+Build App => Run tests => Build Image => push to docker repo =>
+
+If we want , we can ask for user input for version
+
+In stage
+
+stage("deploy") {
+	input {
+		message "Select the environment to deploy"
+		ok "done"
+		parameters {
+			choice(name: 'ENV', choices ['dev', 'prod'])
+		}
+	steps {
+		script {
+		gv.deployapp
+			}
+		}
+	}
+}
+
+If we run the deploy stage will be paused, move curser over to the build area and select the choice
+
+We can also choose multiple options
+
+===
+
+Create a full pipeline with jenkins
+
+pipeline {
+	agent any
+	tools {
+		maven 'Maven'
+	}
+	stages {
+		stage("build jar") {
+			steps {
+				script{
+					echo "Building app"
+					sh 'mvn package'
+				}
+			}
+		}
+
+		stage("build image") {
+			steps {
+				script{
+					withCredentiials([usernamePassword9crenditalsid: docker-hub-repo, passwordVariable: 'PASS', usernameVariable: 'USER')] )
+					sh 'docker build -t nanajanashia/demo-app:jma:2.4 .'
+					sh echo $PASS | "docker login -u $USER" --password-stdin
+					sh 'docker push nanajanashia/demoapp:jma2.0'
+				}
+			}
+		}
+
+	}
+}
+
+Run the script and check
+
+to define groovy script
+
+def gv
+
+add init stage
+
+	stage ("init") {
+		steps {
+			script {
+			gv= load "script..groovy"
+		}
+	}
+}
+
+===
+
+
