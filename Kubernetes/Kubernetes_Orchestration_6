@@ -1,0 +1,130 @@
+Kubernetes CLI - Main kubectl commands
+
+Pre-requisties, 
+
+Minikube and Kuberctl installed
+
+kubectl get nodes = gets status of the nodes
+
+kubectl get pod = shows pods
+
+kubectl get services = shows running services
+
+kubectl create -h = shows help on creat command 
+
+In kubernetes world, pod is created automatically witih deployment 
+
+kubectl create deployment NAME --image=image [options]
+
+Lets create nginx deployment
+
+kubectl create deployment nginx-depl --image=nginx
+
+Now we can see one deployment getting created
+
+kubectl get dpeloyment 
+
+kubectl get pod 
+
+we can see details 
+
+Deployment creates the pods, it has blueprint for creating pods, 
+
+kubectl get replicaset = shows state od replicas
+
+Pod name is made of deployment name replicaset id and own id
+
+replicaset is managing replicas of pod. We don't practiccally work on it but we work with deployment 
+
+Layers of obstraction 
+
+Deployment manages a replicaset
+replicaset manages a pod
+pod is an abstraction of a container 
+
+Everything below dpeloyment is automatically managed by K8s
+
+Try 
+
+kubectl edit deployment nginx-depl
+
+We get auto generated config of deployment 
+
+Now Lets scrool to image and fix the version to nginx:1.16
+
+kubectl get pod = Old gets termated and new gets started 
+
+===
+
+kubectl get replicaset = old one gets deleted and new gets started
+
+Debugging Pods
+
+kubectl lods podname = shows the log of pod
+
+create another deployment
+
+kubectl create deployment mongo-depl --image=mongo
+
+kubectl get pod
+
+kubectl describe podname = shows pod running details
+
+kubectl lods podname = shows mongodb pod cont detail
+
+kubectl exec -it podname -- bin/bash
+
+with this command we can terminal of mongo db container
+
+To delete deloyment
+
+kubectl get deployment  = we can see two now
+
+kubectl delete deployment nameofdeployment
+
+Now pod should be termincation
+
+check
+
+kubectl get pod
+kubectl get replicaset
+
+Everything happens at deployment level
+
+We can write configuration in file and apply for there
+
+kubectl apply -f config-file.yaml
+
+===
+
+Lets create basic config yaml file for nginx in k8s
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+	name: nginx-deployment
+	labels:
+		app: nginx
+spec:
+	replicas: 1
+	selector:
+		matchLabels:
+			app: nginx
+	template:
+		metadata:
+			labels:
+				app: nginx
+		spec:
+			container:
+			- name: nginx
+			   image: nginx:1.16
+			   ports:
+			   - contianerPort: 80
+
+kubectl apply -f filename.yaml
+
+kubectl get pod = now we can see deployment gets created and running
+
+If we reapply - K8s knows it already exists so it gets updated instead of creating new one
+
+
