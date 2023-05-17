@@ -340,3 +340,22 @@ kubectl version = shows version of k8s
 kubectl cli is for configuring the minikube cluster
 
 minikube cli si for startup/deleting the cluster
+
+
+Questions from the above content
+
+What is the purpose of Kubernetes orchestration?
+What are the main components of Kubernetes?
+How do you install Minikube and kubectl for local setup?
+What are the main commands used with kubectl?
+What are YAML configuration files in Kubernetes?
+How do you organize components using namespaces in Kubernetes?
+How do you configure connectivity services in Kubernetes?
+How do you make an application available from outside using ingress in Kubernetes?
+What is the purpose of volumes in Kubernetes and how do they work?
+What are config maps and secrets in Kubernetes and how are they used?
+How do you deploy stateful applications in Kubernetes using StatefulSets?
+What is Helm and how is it used as a package manager in Kubernetes?
+What is the concept of microservices in Kubernetes?
+What are the production and security best practices in Kubernetes?
+How do you implement authorization in Kubernetes using role-based access control?
